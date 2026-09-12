@@ -1,8 +1,8 @@
 # Go Clean Architecture Template
 
-A learning-focused Go template demonstrating clean architecture principles by combining two official Go tutorials: [Database Access](https://go.dev/doc/tutorial/database-access) and [Web Service with Gin](https://go.dev/doc/tutorial/web-service-gin).
+A production-ready Go reference architecture demonstrating domain decoupling and maintainable backend services. This architecture synthesizes enterprise best practices, utilizing [Database Access](https://go.dev/doc/tutorial/database-access) and [Web Service with Gin](https://go.dev/doc/tutorial/web-service-gin) as foundational models.
 
-This project is designed to showcase best practices in Go project templating, architecture patterns, and creating testable, maintainable backend services.
+This project is designed to showcase structural engineering concepts, clean architecture patterns, and the creation of highly testable, concurrent backend systems.
 
 ## Technology Stack
 
@@ -17,9 +17,9 @@ This project is designed to showcase best practices in Go project templating, ar
 
 ## Architecture Overview
 
-This project follows the [evrone/go-clean-template](https://github.com/evrone/go-clean-template) approach with a simplified structure for clarity:
+This project adapts the [evrone/go-clean-template](https://github.com/evrone/go-clean-template), but intentionally strips away heavy boilerplate and unnecessary external adapters. It is a simplified, lean version optimized for rapid feature delivery and our specific project scope, ensuring we maintain the strict domain decoupling of Clean Architecture without the bloat:
 
-```
+```text
 ├── cmd/app/           # Application entry point
 ├── config/            # Configuration management
 ├── internal/          # Private application code
@@ -38,7 +38,7 @@ This project follows the [evrone/go-clean-template](https://github.com/evrone/go
 ### Prerequisites
 
 * Go 1.21+
-* MariaDB (or Docker to run it)
+* MariaDB (or Docker provisioning)
 
 ### Installation & Running
 
@@ -63,7 +63,7 @@ This project follows the [evrone/go-clean-template](https://github.com/evrone/go
    go run -tags migrate cmd/app/main.go
    ```
 
-The server will start on `http://localhost:8080`.
+The server will initialize on `http://localhost:8080`.
 
 ## API Endpoints
 
@@ -77,18 +77,18 @@ The server will start on `http://localhost:8080`.
 
 ### 1. Clean Architecture Layers
 
-* **Entities** (`internal/entity/`): Pure business models with no external dependencies.
-* **Use Cases** (`internal/usecase/`): Business logic that orchestrates repositories, with no knowledge of HTTP or databases.
-* **Repositories** (`internal/repository/`): Data access abstractions that implement interfaces defined in the use cases.
-* **Controllers** (`internal/controller/`): HTTP request handling, input validation, and delegation to use cases.
+* **Entities** (`internal/entity/`): Pure business models with zero external dependencies.
+* **Use Cases** (`internal/usecase/`): Core business logic orchestrating repositories, strictly isolated from HTTP or database awareness.
+* **Repositories** (`internal/repository/`): Data access abstractions implementing interfaces defined by the business layer.
+* **Controllers** (`internal/controller/`): HTTP request handling, input sanitization, and delegation to use cases.
 
 ### 2. Dependency Injection
 
-The application uses constructor-based dependency injection in `internal/app/app.go` to decouple components: repositories are injected into use cases, and use cases are injected into controllers. This makes each layer independently testable.
+The application utilizes constructor-based dependency injection within `internal/app/app.go` to strictly decouple components. Repositories are injected into use cases, and use cases into controllers, guaranteeing that every architectural layer remains independently testable.
 
 ### 3. Interface-Based Design
 
-Business logic depends on interfaces, not concrete implementations, allowing for easy mocking in tests and swapping of implementations (e.g., changing the database).
+Business logic relies entirely on interfaces rather than concrete implementations. This enforces modularity, allowing for frictionless mocking during test cycles and seamless swapping of underlying infrastructure (e.g., database migrations).
 
 ```go
 // internal/usecase/type.go
@@ -99,24 +99,20 @@ type AlbumRepository interface {
 
 // internal/usecase/function.go
 func (uc *AlbumUseCase) GetAlbums() ([]entity.Album, error) {
-    return uc.repo.GetAlbums() // Works with any AlbumRepository implementation
+    return uc.repo.GetAlbums() // Executes via any AlbumRepository implementation
 }
 ```
 
 ## Testing Strategy
 
-The clean architecture makes testing straightforward:
+The isolated architecture guarantees frictionless testing pipelines:
 
-* **Unit Tests:** Use cases are tested with mocked repositories to isolate business logic.
-* **Integration Tests:** Repositories are tested against a real test database to verify data persistence.
-* **HTTP Tests:** Controllers can be tested with a mocked use case layer.
+* **Unit Tests:** Use cases validate business logic using mocked repositories.
+* **Integration Tests:** Repositories execute against a live test database to ensure data persistence integrity.
+* **HTTP Tests:** Controllers validate routing and input parsing using mocked use cases.
 
-To run all tests:
+Execute the full test suite:
 
 ```bash
 go test ./... -v
 ```
-
----
-
-**Happy Learning! 🚀**
